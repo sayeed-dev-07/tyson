@@ -263,7 +263,7 @@ const Hero = () => {
                 </div>
 
                 {/* --- SCROLL TO DISCOVER TEXT & ANIMATED LINE --- */}
-                <div className="scroll-indicator absolute bottom-4 right-4 md:bottom-8 md:right-8 flex items-center gap-3 z-20">
+                <div className="scroll-indicator absolute bottom-4 right-4 md:bottom-2 md:right-8 flex items-center gap-3 z-20">
                     <span className="font-secondary text-xs md:text-sm font-bold uppercase tracking-wider text-[#F05641]">
                         Scroll to discover
                     </span>

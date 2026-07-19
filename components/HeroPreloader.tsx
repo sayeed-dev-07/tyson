@@ -25,8 +25,13 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
         };
 
         const executePreloader = async () => {
-            // Promise 1: The mandatory 5-second minimum wait time
-            const minimumWaitTime = new Promise(resolve => setTimeout(resolve, 5000));
+            // Determine screen size (Tailwind 'md' breakpoint is 768px)
+            // This safely runs only on the client because it's inside useEffect
+            const isMdOrLarger = window.matchMedia('(min-width: 768px)').matches;
+            const requiredWaitTime = isMdOrLarger ? 3000 : 5000;
+
+            // Promise 1: The mandatory minimum wait time based on screen size
+            const minimumWaitTime = new Promise(resolve => setTimeout(resolve, requiredWaitTime));
 
             // Promise 2: Wait for fonts and window assets to finish downloading
             const assetsLoaded = new Promise<void>((resolve) => {
@@ -47,7 +52,7 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
             });
 
             // This tells the browser: Do not move to the next line until BOTH 
-            // the 5-second timer is done AND the assets are loaded.
+            // the dynamic timer is done AND the assets are loaded.
             await Promise.all([minimumWaitTime, assetsLoaded]);
 
             startExitSequence();

@@ -3,21 +3,21 @@
 
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger"; // Make sure this is imported
 
+// Register ScrollTrigger if you haven't globally
+gsap.registerPlugin(ScrollTrigger);
 
 export default function CanvasSequence() {
-    // Refs to access the DOM elements directly
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Store variables in refs so they persist across renders without triggering React re-renders
     const imagesRef = useRef<(ImageBitmap | null)[]>(new Array(130).fill(null));
     const seqRef = useRef({ frame: 0 });
 
     const TOTAL_FRAMES = 130;
     const INITIAL_BATCH = 20;
 
-    // Because it's in the Next.js 'public' folder, we start with a forward slash
     const IMAGE_BASE_URL = "/frames/";
 
     useEffect(() => {
@@ -29,20 +29,19 @@ export default function CanvasSequence() {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Set internal canvas resolution to match your images
         canvas.width = 1920;
         canvas.height = 1080;
 
-        // GSAP Context makes cleanup super easy in React (especially important for React 18 Strict Mode)
+        // Prevent ScrollTrigger from recalculating pinning when the mobile address bar hides/shows
+        ScrollTrigger.config({ ignoreMobileResize: true });
+
         const ctxGsap = gsap.context(() => { });
 
-        // 1. Helper function to generate URL
         const getFrameUrl = (index: number) => {
             const frameNumber = (index + 1).toString().padStart(4, "0");
             return `${IMAGE_BASE_URL}frame-${frameNumber}.webp`;
         };
 
-        // 2. Fetch and decode a single frame
         const loadFrame = async (index: number) => {
             try {
                 const response = await fetch(getFrameUrl(index));
@@ -54,7 +53,6 @@ export default function CanvasSequence() {
             }
         };
 
-        // 3. Render function
         const render = () => {
             const currentFrameIndex = Math.round(seqRef.current.frame);
             const img = imagesRef.current[currentFrameIndex];
@@ -65,7 +63,6 @@ export default function CanvasSequence() {
             }
         };
 
-        // 4. Background queue using requestIdleCallback
         const loadRemainingFrames = (startIndex: number) => {
             let currentIndex = startIndex;
 
@@ -91,19 +88,15 @@ export default function CanvasSequence() {
             requestIdle(loadNextBatch);
         };
 
-        // 5. Main Initialization sequence
         const initSequence = async () => {
-            // Load initial batch
             const initialPromises = [];
             for (let i = 0; i < INITIAL_BATCH; i++) {
                 initialPromises.push(loadFrame(i));
             }
             await Promise.all(initialPromises);
 
-            // Render first frame immediately so the user sees it
             render();
 
-            // Setup GSAP inside the context for safe cleanup
             ctxGsap.add(() => {
                 gsap.to(seqRef.current, {
                     frame: TOTAL_FRAMES - 1,
@@ -114,34 +107,35 @@ export default function CanvasSequence() {
                         pin: true,
                         scrub: 0.5,
                         start: "top top",
-                        end: "+=400%", // Makes the scroll area 4x the viewport height
+                        end: "+=400%",
                     },
                     onUpdate: render,
                 });
             });
 
-            // Load the rest of the 110 frames in the background
             loadRemainingFrames(INITIAL_BATCH);
         };
 
         initSequence();
 
-        // Cleanup function: Reverts the GSAP animations when the component unmounts
         return () => {
             ctxGsap.revert();
         };
-    }, []); // Empty dependency array ensures this runs only once on mount
+    }, []);
 
     return (
         <div
             ref={containerRef}
-            className="relative h-dvh w-full max-w-full overflow-hidden bg-black"
-            style={{ width: "100%", maxWidth: "100%", height: "100dvh", position: "relative", overflow: "hidden", backgroundColor: "#000" }} // Inline fallback if not using Tailwind
+            // Replaced h-dvh with h-screen (100vh)
+            className="relative h-screen w-full max-w-full overflow-hidden bg-black"
+            // Replaced 100svh with 100vh
+            style={{ width: "100%", maxWidth: "100%", height: "100vh", position: "relative", overflow: "hidden", backgroundColor: "#000" }}
         >
             <canvas
                 ref={canvasRef}
-                className="block h-dvh w-full max-w-full object-cover"
-                style={{ width: "100%", maxWidth: "100%", height: "100%", objectFit: "cover", display: "block" }} // Inline fallback
+                // Replaced h-dvh with h-screen
+                className="block h-screen w-full max-w-full object-cover"
+                style={{ width: "100%", maxWidth: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
         </div>
     );

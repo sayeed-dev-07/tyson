@@ -1,6 +1,7 @@
 import About from '@/sections/About';
 import Hero from '@/sections/Hero';
 import CanvasSequence from '@/sections/VideoSection';
+import WhoIm from '@/sections/WhoIm';
 import React from 'react';
 
 const page = () => {
@@ -9,7 +10,9 @@ const page = () => {
       <Hero />
 
       <About />
-        <CanvasSequence />
+      <WhoIm />
+      <CanvasSequence />
+
     </>
   );
 };

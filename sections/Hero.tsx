@@ -235,7 +235,7 @@ const Hero = () => {
                             className="word-wrapper relative w-full"
                         >
                             {word.toLowerCase() === 'thinker' && (
-                                <p className="creator-credit invisible absolute left-0 top-7 z-10 -translate-y-1/2 whitespace-nowrap font-secondary text-[length:var(--hero-credit-size)] font-bold capitalize leading-[1.05] tracking-normal text-white">
+                                <p className="creator-credit invisible absolute left-0 bottom-0 z-10 -translate-y-1/2 whitespace-nowrap font-secondary text-[length:var(--hero-credit-size)] font-bold capitalize leading-[1.05] tracking-normal text-white">
                                     Design and Develop<br />
                                     by Sayeed
                                 </p>

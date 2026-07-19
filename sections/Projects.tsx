@@ -122,7 +122,7 @@ const Projects = () => {
                 const onMouseEnter = () => {
                     gsap.to(hoverBg, {
                         xPercent: 0,
-                        duration: 0.5,
+                        duration: 0.3,
                         ease: "cubic-bezier(0.7, 0, 0.3, 1)" // Match original CSS ease
                     });
                 };
@@ -130,7 +130,7 @@ const Projects = () => {
                 const onMouseLeave = () => {
                     gsap.to(hoverBg, {
                         xPercent: -100,
-                        duration: 0.5,
+                        duration: 0.3,
                         ease: "cubic-bezier(0.7, 0, 0.3, 1)"
                     });
                 };

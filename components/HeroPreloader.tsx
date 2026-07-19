@@ -26,7 +26,7 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
 
         const executePreloader = async () => {
             // Promise 1: The mandatory 5-second minimum wait time
-            const minimumWaitTime = new Promise(resolve => setTimeout(resolve, 1000));
+            const minimumWaitTime = new Promise(resolve => setTimeout(resolve, 5000));
 
             // Promise 2: Wait for fonts and window assets to finish downloading
             const assetsLoaded = new Promise<void>((resolve) => {

@@ -2,12 +2,11 @@
 
 import React, { useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
-if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
-}
+gsap.config({
+    force3D: true
+})
 
 const WhoIm = () => {
     const tallContainerRef = useRef<HTMLDivElement>(null);
@@ -17,7 +16,7 @@ const WhoIm = () => {
     const mergedWrapperRef = useRef<HTMLDivElement>(null);
     const bioTextRef = useRef<HTMLDivElement>(null);
 
-    const bioLines = ["Web Developer", "Web Designer", "gamer"];
+    const bioLines = ["Web Developer", "Engineer", "Gamer"];
 
     useGSAP(() => {
         gsap.set(topTextRef.current, { yPercent: -75, x: "-100vw" });
@@ -109,13 +108,13 @@ const WhoIm = () => {
                     className="relative z-10 w-full h-full flex items-center justify-center pointer-events-none font-secondary will-change-transform"
                 >
                     <h1 ref={topTextRef} className="text-[clamp(2.5rem,18vw,20rem)] absolute text-[#FBA555]  font-black uppercase leading-none  m-0 p-0 will-change-transform whitespace-nowrap">
-                        WHO I AM
+                        WHO I AM ?
                     </h1>
                     <h1 ref={middleTextRef} className="text-[clamp(2.5rem,18vw,20rem)] absolute text-[#FBA555]  font-black uppercase leading-none  m-0 p-0 will-change-transform whitespace-nowrap">
-                        WHO I AM
+                        WHO I AM ?
                     </h1>
                     <h1 ref={bottomTextRef} className="absolute text-[clamp(2.5rem,18vw,20rem)] text-[#FBA555]  font-black uppercase leading-none  m-0 p-0 will-change-transform whitespace-nowrap">
-                        WHO I AM
+                        WHO I AM ?
                     </h1>
                 </div>
 

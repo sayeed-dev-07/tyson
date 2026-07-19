@@ -6,8 +6,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BlockRevealText } from "@/components/normal/BlockRevealText";
 
-// Register ScrollTrigger if you haven't globally
-gsap.registerPlugin(ScrollTrigger);
+gsap.config({
+    force3D: true
+})
 
 export default function CanvasSequence() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -162,10 +163,17 @@ export default function CanvasSequence() {
                 {/* Conditionally render the text so the animation fires right when it becomes visible */}
                 {showText && (
                     <>
-                        <BlockRevealText
-                            text="thanks for visiting"
-                            textClassName="text-5xl md:text-7xl font-primary uppercase mb-8 text-coral"
-                        />
+                        {/* SPLIT TEXT INTO TWO LINES FOR PERFECT CENTERING */}
+                        <div className="flex flex-col items-center justify-center mb-8 gap-y-2">
+                            <BlockRevealText
+                                text="thanks for"
+                                textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
+                            />
+                            <BlockRevealText
+                                text="visiting"
+                                textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
+                            />
+                        </div>
 
                         <div className="flex flex-col text-center items-center gap-y-3 mt-6">
                             <BlockRevealText

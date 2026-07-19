@@ -3,11 +3,12 @@
 import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import SplitType from 'split-type';
 
-// Ensure ScrollTrigger is registered
-gsap.registerPlugin(ScrollTrigger);
+gsap.config({
+    force3D: true
+})
 
 interface BlockRevealTextProps {
     text: string;

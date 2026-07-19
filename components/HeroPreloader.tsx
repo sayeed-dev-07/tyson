@@ -1,6 +1,10 @@
 'use client'
 
+import gsap from 'gsap';
 import { useEffect, useState } from 'react';
+gsap.config({
+    force3D: true
+})
 
 type HeroPreloaderProps = {
     onComplete: () => void;

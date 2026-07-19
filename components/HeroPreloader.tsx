@@ -11,7 +11,6 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
 
     useEffect(() => {
         let exitTimer: number;
-        let safetyTimer: number;
         let isMounted = true;
 
         const startExitSequence = () => {
@@ -25,33 +24,40 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
             }, 500);
         };
 
-        const handleLoad = async () => {
-            // Wait for custom fonts to load (crucial for your GSAP text measuring)
-            await document.fonts?.ready;
+        const executePreloader = async () => {
+            // Promise 1: The mandatory 5-second minimum wait time
+            const minimumWaitTime = new Promise(resolve => setTimeout(resolve, 5000));
 
-            // If the page is already fully loaded by the time this runs
-            if (document.readyState === 'complete') {
-                startExitSequence();
-            } else {
-                // Otherwise, wait for the window load event (images, iframes, etc.)
-                window.addEventListener('load', startExitSequence);
-            }
+            // Promise 2: Wait for fonts and window assets to finish downloading
+            const assetsLoaded = new Promise<void>((resolve) => {
+                const checkLoad = async () => {
+                    await document.fonts?.ready;
+                    if (document.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        window.addEventListener('load', () => resolve(), { once: true });
+                    }
+                };
+
+                checkLoad();
+
+                // Safety fallback: If assets take way too long (e.g., hanging image), 
+                // force the load promise to resolve after 10 seconds anyway.
+                setTimeout(resolve, 10000);
+            });
+
+            // This tells the browser: Do not move to the next line until BOTH 
+            // the 5-second timer is done AND the assets are loaded.
+            await Promise.all([minimumWaitTime, assetsLoaded]);
+
+            startExitSequence();
         };
 
-        handleLoad();
-
-        // Safety fallback: if a resource hangs on a slow network, don't trap the user forever.
-        // Force the preloader to exit after 8 seconds.
-        safetyTimer = window.setTimeout(() => {
-            window.removeEventListener('load', startExitSequence);
-            startExitSequence();
-        }, 8000);
+        executePreloader();
 
         return () => {
             isMounted = false;
-            window.removeEventListener('load', startExitSequence);
             window.clearTimeout(exitTimer);
-            window.clearTimeout(safetyTimer);
         };
     }, [onComplete]);
 

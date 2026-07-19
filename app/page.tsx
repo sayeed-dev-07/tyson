@@ -9,9 +9,7 @@ const page = () => {
       <Hero />
 
       <About />
-      <div className='hidden md:block'>
         <CanvasSequence />
-      </div>
     </>
   );
 };

@@ -55,7 +55,7 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
         gsap.to(covers, {
             scrollTrigger: {
                 trigger: containerRef.current,
-                start: "top 85%",
+                start: "top 90%",
                 toggleActions: "play none none none"
             },
             clipPath: "inset(0% 0% 0% 100%)", // Slide out to the right
@@ -72,7 +72,7 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
 
     return (
         <div ref={containerRef} className={`relative w-fit ${containerClassName}`}>
-            <h2 ref={textRef} className={`  ${textClassName}`}>
+            <h2 ref={textRef} className={` text-center ${textClassName}`}>
                 {text}
             </h2>
         </div>

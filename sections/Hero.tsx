@@ -6,7 +6,6 @@ import { useLenis } from 'lenis/react';
 import type Lenis from 'lenis';
 import HeroPreloader from '@/components/HeroPreloader';
 
-
 gsap.config({
     force3D: true
 })
@@ -74,7 +73,9 @@ const Hero = () => {
             const widthFit = (stageWidth * 0.98 / widestWord) * 100;
             const heightFit = (stageHeight * 0.84 / (words.length * lineHeight));
             const preliminaryFontSize = Math.min(widthFit, heightFit);
-            const creditFontSize = Math.max(6, Math.min(15, preliminaryFontSize * 0.11, stageWidth * 0.025));
+
+            // FIX: Increased minimum size from 6 to 10, and increased the multiplier from 0.025 to 0.035 for better mobile legibility
+            const creditFontSize = Math.max(14, Math.min(18, preliminaryFontSize * 0.15, stageWidth * 0.035));
 
             container.style.setProperty('--hero-credit-size', `${creditFontSize}px`);
 
@@ -93,7 +94,7 @@ const Hero = () => {
                 }
             }
 
-            const creditGap = Math.max(6, Math.min(18, stageWidth * 0.018));
+            const creditGap = Math.max(8, Math.min(20, stageWidth * 0.02)); // Slightly increased gap to match bigger text
             const thinkerOffset = Math.ceil(creditWidth + creditGap);
             const thinkerWidth = wordWidths.thinker || widestWord;
             const thinkerFit = ((stageWidth * 0.98) - thinkerOffset) / thinkerWidth * 100;
@@ -153,6 +154,8 @@ const Hero = () => {
 
         gsap.set('.word-wrapper', { height: 0 });
 
+        gsap.set('.scroll-indicator', { autoAlpha: 0 }); // Hide scroll indicator initially
+
         gsap.set('.word', {
             scale: 0,
             opacity: 0,
@@ -171,24 +174,21 @@ const Hero = () => {
             duration: 1.5,
             stagger: 0.8,
             ease: 'power4.out',
-        }, 0.3) // <-- Shifted forward by 0.3 seconds
+        }, 0.3)
             .to('.word', {
                 scale: 1,
                 opacity: 1,
                 y: 0,
-                // Removed delay: -0.3
                 duration: 1.5,
                 stagger: 0.8,
                 ease: 'power4.out',
-            }, 0) // <-- Starts at exactly 0.0 seconds
-
+            }, 0)
             .to('.word', {
                 marginLeft: '0',
                 xPercent: 0,
                 duration: 1.6,
                 ease: 'power4.out'
             }, ">")
-
             .to('.word-thinker', {
                 marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset'),
                 duration: 0.9,
@@ -204,7 +204,21 @@ const Hero = () => {
                 x: 0,
                 duration: 0.9,
                 ease: 'power4.out'
-            }, '<');
+            }, '<')
+            .to('.scroll-indicator', { // Fade in the scroll indicator at the end
+                autoAlpha: 1,
+                duration: 1,
+                ease: 'power2.out'
+            }, '<+=0.5');
+
+        // Infinite animation for the scroll line
+        gsap.to('.scroll-line', {
+            xPercent: 100,
+            repeat: -1,
+            duration: 1.5,
+            ease: 'power2.inOut',
+            startAt: { xPercent: -100 } // Start outside to the left, move to outside right
+        });
 
         if (hasPreloaderCompletedRef.current) {
             tl.play(0);
@@ -221,9 +235,10 @@ const Hero = () => {
     }, { scope: containerRef, dependencies: [] });
 
     return (
+        // Adjusted the fallback clamp size for the credit text here as well
         <div
             ref={containerRef}
-            className="relative h-[100svh] w-full overflow-hidden p-3 [--hero-credit-size:clamp(0.45rem,1vw,0.95rem)] [--hero-thinker-offset:8vw] [--hero-word-size:clamp(3rem,min(11.5vw,22svh),18rem)]"
+            className="relative h-[100svh] w-full overflow-hidden p-3 [--hero-credit-size:clamp(0.65rem,1.5vw,1.1rem)] [--hero-thinker-offset:8vw] [--hero-word-size:clamp(3rem,min(11.5vw,22svh),18rem)]"
         >
             <div className="relative w-full h-full">
                 <div
@@ -246,6 +261,19 @@ const Hero = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* --- SCROLL TO DISCOVER TEXT & ANIMATED LINE --- */}
+                <div className="scroll-indicator absolute bottom-4 right-4 md:bottom-8 md:right-8 flex items-center gap-3 z-20">
+                    <span className="font-secondary text-xs md:text-sm font-bold uppercase tracking-wider text-[#F05641]">
+                        Scroll to discover
+                    </span>
+                    {/* Outer overflow-hidden wrapper with max-width */}
+                    <div className="relative h-[2px] w-16 max-w-[64px] overflow-hidden bg-white/20">
+                        {/* Inner line that animates */}
+                        <div className="scroll-line absolute left-0 top-0 h-full w-full bg-[#F05641]"></div>
+                    </div>
+                </div>
+
             </div>
             {showPreloader && <HeroPreloader onComplete={startHeroIntro} />}
         </div>

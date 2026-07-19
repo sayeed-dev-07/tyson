@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger"; // Make sure this is imported
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { BlockRevealText } from "@/components/normal/BlockRevealText";
 
 // Register ScrollTrigger if you haven't globally
 gsap.registerPlugin(ScrollTrigger);
@@ -11,6 +12,10 @@ gsap.registerPlugin(ScrollTrigger);
 export default function CanvasSequence() {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
+
+    // Add state to trigger the text rendering
+    const [showText, setShowText] = useState(false);
 
     const imagesRef = useRef<(ImageBitmap | null)[]>(new Array(130).fill(null));
     const seqRef = useRef({ frame: 0 });
@@ -23,8 +28,9 @@ export default function CanvasSequence() {
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
+        const overlay = overlayRef.current;
 
-        if (!canvas || !container) return;
+        if (!canvas || !container || !overlay) return;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
@@ -32,7 +38,6 @@ export default function CanvasSequence() {
         canvas.width = 1920;
         canvas.height = 1080;
 
-        // Prevent ScrollTrigger from recalculating pinning when the mobile address bar hides/shows
         ScrollTrigger.config({ ignoreMobileResize: true });
 
         const ctxGsap = gsap.context(() => { });
@@ -98,19 +103,34 @@ export default function CanvasSequence() {
             render();
 
             ctxGsap.add(() => {
-                gsap.to(seqRef.current, {
-                    frame: TOTAL_FRAMES - 1,
-                    snap: "frame",
-                    ease: "none",
+                const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: container,
                         pin: true,
                         scrub: 0.5,
                         start: "top top",
                         end: "+=400%",
-                    },
-                    onUpdate: render,
+                        // Watch the scroll progress and update our React state
+                        onUpdate: (self) => {
+                            // If we pass the 80% mark, show the text. Otherwise, hide it.
+                            setShowText(self.progress >= 0.8);
+                        }
+                    }
                 });
+
+                tl.to(seqRef.current, {
+                    frame: TOTAL_FRAMES - 1,
+                    snap: "frame",
+                    ease: "none",
+                    onUpdate: render,
+                    duration: 1
+                }, 0);
+
+                tl.fromTo(overlay,
+                    { autoAlpha: 0, y: 50 },
+                    { autoAlpha: 1, y: 0, duration: 0.2, ease: "power2.out" },
+                    0.8
+                );
             });
 
             loadRemainingFrames(INITIAL_BATCH);
@@ -126,17 +146,42 @@ export default function CanvasSequence() {
     return (
         <div
             ref={containerRef}
-            // Replaced h-dvh with h-screen (100vh)
             className="relative h-screen w-full max-w-full overflow-hidden bg-black"
-            // Replaced 100svh with 100vh
             style={{ width: "100%", maxWidth: "100%", height: "100vh", position: "relative", overflow: "hidden", backgroundColor: "#000" }}
         >
             <canvas
                 ref={canvasRef}
-                // Replaced h-dvh with h-screen
                 className="block h-screen w-full max-w-full object-cover"
                 style={{ width: "100%", maxWidth: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
+
+            <div
+                ref={overlayRef}
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 text-white text-center invisible px-4"
+            >
+                {/* Conditionally render the text so the animation fires right when it becomes visible */}
+                {showText && (
+                    <>
+                        <BlockRevealText
+                            text="thanks for visiting"
+                            textClassName="text-5xl md:text-7xl font-primary uppercase mb-8 text-coral"
+                        />
+
+                        <div className="flex flex-col text-center items-center gap-y-3 mt-6">
+                            <BlockRevealText
+                                blockColor="#f4f1de"
+                                text="coded by"
+                                textClassName="text-xs md:text-sm tracking-[0.4em] uppercase text-gray-400 font-classic font-light"
+                            />
+                            <BlockRevealText
+                                blockColor="#f4f1de"
+                                text="sayed shorif"
+                                textClassName="text-2xl md:text-3xl tracking-widest capitalize font-secondary text-orange-50"
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 }

@@ -50,19 +50,19 @@ const ContactLink: React.FC<ContactLinkProps> = ({ label, value, href }) => {
     return (
         <a
             href={href}
-            className="flex flex-col gap-2 group cursor-pointer  w-auto"
+            className="flex flex-col items-start gap-2 group cursor-pointer  w-auto"
             onMouseEnter={handleHover}
             target="_blank"
             rel="noopener noreferrer"
         >
             {/* Label */}
-            <div className="flex items-center gap-2 text-orange-400 font-bold tracking-widest text-sm uppercase">
+            <div className="flex items-center gap-1 text-orange-400 font-bold tracking-widest text-sm uppercase wrap-break-word">
                 <span className="w-2 h-2 bg-orange-400 block"></span>
                 {label}
             </div>
 
             {/* Value and Animated Underline */}
-            <div className="text-xl md:text-3xl font-bold text-orange-50 pb-3 font-classic relative">
+            <div className="text-xl wrap-break-word md:text-3xl w-fit font-bold text-orange-50 pb-1 font-classic relative">
                 {value}
 
                 {/* Overflow hidden container bounding the animated lines */}
@@ -115,7 +115,7 @@ const Contact: React.FC = () => {
     }, { scope: container });
 
     return (
-        <div ref={container} className='py-20 px-4 sm:px-12 min-h-screen flex flex-col justify-center '>
+        <div ref={container} className='py-10 px-4 sm:px-12 min-h-screen flex flex-col justify-center '>
 
             {/* Heading Section */}
             <div className='flex flex-col uppercase items-center gap-y-4 leading-[0.9] font-primary text-coral' style={{ fontSize: "clamp(3rem, 10vw, 9rem)" }}>
@@ -125,7 +125,7 @@ const Contact: React.FC = () => {
             </div>
 
             {/* Links Section */}
-            <div className='flex flex-wrap justify-start mt-32 gap-12 w-full '>
+            <div className='flex flex-wrap   mt-32 gap-4 sm:gap-6 md:gap-8 lg:gap-12 w-full '>
                 <ContactLink
                     label="GITHUB"
                     value="sayeed-dev-07"
@@ -133,7 +133,7 @@ const Contact: React.FC = () => {
                 />
                 <ContactLink
                     label="EMAIL ME"
-                    value="Gmail"
+                    value="expsayeedshorif@gmail.com"
                     href="mailto:expsayeedshorif@gmail.com"
                 />
                 <ContactLink

@@ -106,7 +106,7 @@ const SkillsPage = () => {
                             />
 
                             {/* Skill Items List */}
-                            <div className="flex flex-col space-y-1.5">
+                            <div className="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 space-y-1.5">
                                 {category.items.map((skill, skillIndex) => (
                                     <BlockRevealText
                                         key={skillIndex}

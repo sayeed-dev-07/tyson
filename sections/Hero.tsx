@@ -29,6 +29,7 @@ const Hero = () => {
     const startHeroIntro = useCallback(() => {
         hasPreloaderCompletedRef.current = true;
         setShowPreloader(false);
+        // This will safely do nothing on mobile since introTimelineRef is null
         introTimelineRef.current?.play(0);
     }, []);
 
@@ -74,7 +75,6 @@ const Hero = () => {
             const heightFit = (stageHeight * 0.84 / (words.length * lineHeight));
             const preliminaryFontSize = Math.min(widthFit, heightFit);
 
-            // FIX: Increased minimum size from 6 to 10, and increased the multiplier from 0.025 to 0.035 for better mobile legibility
             const creditFontSize = Math.max(14, Math.min(18, preliminaryFontSize * 0.15, stageWidth * 0.035));
 
             container.style.setProperty('--hero-credit-size', `${creditFontSize}px`);
@@ -94,7 +94,7 @@ const Hero = () => {
                 }
             }
 
-            const creditGap = Math.max(8, Math.min(20, stageWidth * 0.02)); // Slightly increased gap to match bigger text
+            const creditGap = Math.max(8, Math.min(20, stageWidth * 0.02));
             const thinkerOffset = Math.ceil(creditWidth + creditGap);
             const thinkerWidth = wordWidths.thinker || widestWord;
             const thinkerFit = ((stageWidth * 0.98) - thinkerOffset) / thinkerWidth * 100;
@@ -143,99 +143,137 @@ const Hero = () => {
             body.style.overflow = previousBodyOverflow;
         };
 
-        lockScroll();
+        // Initialize GSAP MatchMedia
+        const mm = gsap.matchMedia();
 
-        const tl = gsap.timeline({
-            paused: true,
-            onComplete: unlockScroll,
-        });
+        // -----------------------------
+        // DESKTOP / TABLET (md and up)
+        // -----------------------------
+        mm.add("(min-width: 768px)", () => {
+            lockScroll();
 
-        introTimelineRef.current = tl;
+            const tl = gsap.timeline({
+                paused: true,
+                onComplete: unlockScroll,
+            });
 
-        gsap.set('.word-wrapper', { height: 0 });
+            introTimelineRef.current = tl;
 
-        gsap.set('.scroll-indicator', { autoAlpha: 0 }); // Hide scroll indicator initially
+            gsap.set('.word-wrapper', { height: 0 });
+            gsap.set('.scroll-indicator', { autoAlpha: 0 });
+            gsap.set('.word', {
+                scale: 0,
+                opacity: 0,
+                y: 60,
+                xPercent: -55,
+                transformOrigin: 'center center'
+            });
+            gsap.set('.creator-credit', {
+                autoAlpha: 0,
+                x: '-110%',
+            });
 
-        gsap.set('.word', {
-            scale: 0,
-            opacity: 0,
-            y: 60,
-            xPercent: -55,
-            transformOrigin: 'center center'
-        });
-
-        gsap.set('.creator-credit', {
-            autoAlpha: 0,
-            x: '-110%',
-        });
-
-        tl.to('.word-wrapper', {
-            height: 'auto',
-            duration: 1.5,
-            stagger: 0.8,
-            ease: 'power4.out',
-        }, 0.3)
-            .to('.word', {
-                scale: 1,
-                opacity: 1,
-                y: 0,
+            tl.to('.word-wrapper', {
+                height: 'auto',
                 duration: 1.5,
                 stagger: 0.8,
                 ease: 'power4.out',
-            }, 0)
-            .to('.word', {
-                marginLeft: '0',
-                xPercent: 0,
-                duration: 1.6,
-                ease: 'power4.out'
-            }, ">")
-            .to('.word-thinker', {
-                marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset'),
-                duration: 0.9,
-                ease: 'power4.out',
-                onComplete: () => {
-                    if (containerRef.current) {
-                        containerRef.current.dataset.creatorShown = 'true';
+            }, 0.3)
+                .to('.word', {
+                    scale: 1,
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.5,
+                    stagger: 0.8,
+                    ease: 'power4.out',
+                }, 0)
+                .to('.word', {
+                    marginLeft: '0',
+                    xPercent: 0,
+                    duration: 1.6,
+                    ease: 'power4.out'
+                }, ">")
+                .to('.word-thinker', {
+                    marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset'),
+                    duration: 0.9,
+                    ease: 'power4.out',
+                    onComplete: () => {
+                        if (containerRef.current) {
+                            containerRef.current.dataset.creatorShown = 'true';
+                        }
                     }
+                }, '+=0.15')
+                .to('.creator-credit', {
+                    autoAlpha: 1,
+                    x: 0,
+                    duration: 0.9,
+                    ease: 'power4.out'
+                }, '<')
+                .to('.scroll-indicator', {
+                    autoAlpha: 1,
+                    duration: 1,
+                    ease: 'power2.out'
+                }, '<+=0.5');
+
+            if (hasPreloaderCompletedRef.current) {
+                tl.play(0);
+            }
+
+            return () => {
+                tl.kill();
+                if (introTimelineRef.current === tl) {
+                    introTimelineRef.current = null;
                 }
-            }, '+=0.15')
-            .to('.creator-credit', {
+                unlockScroll();
+            };
+        });
+
+        // -----------------------------
+        // MOBILE (smaller than md)
+        // -----------------------------
+        mm.add("(max-width: 767px)", () => {
+            unlockScroll();
+            introTimelineRef.current = null;
+
+            // Immediately set all elements to their finished animated state
+            gsap.set('.word-wrapper', { height: 'auto' });
+            gsap.set('.scroll-indicator', { autoAlpha: 1 });
+            gsap.set('.word', {
+                scale: 1,
+                opacity: 1,
+                y: 0,
+                xPercent: 0,
+                marginLeft: 0, // Overrides the Tailwind ml-[50vw]
+                transformOrigin: 'center center'
+            });
+            gsap.set('.word-thinker', {
+                marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset')
+            });
+            gsap.set('.creator-credit', {
                 autoAlpha: 1,
                 x: 0,
-                duration: 0.9,
-                ease: 'power4.out'
-            }, '<')
-            .to('.scroll-indicator', { // Fade in the scroll indicator at the end
-                autoAlpha: 1,
-                duration: 1,
-                ease: 'power2.out'
-            }, '<+=0.5');
+            });
 
-        // Infinite animation for the scroll line
+            if (containerRef.current) {
+                containerRef.current.dataset.creatorShown = 'true';
+            }
+        });
+
+        // Infinite animation for the scroll line (runs on both mobile and desktop)
         gsap.to('.scroll-line', {
             xPercent: 100,
             repeat: -1,
             duration: 1.5,
             ease: 'power2.inOut',
-            startAt: { xPercent: -100 } // Start outside to the left, move to outside right
+            startAt: { xPercent: -100 }
         });
 
-        if (hasPreloaderCompletedRef.current) {
-            tl.play(0);
-        }
-
-        return () => {
-            tl.kill();
-            if (introTimelineRef.current === tl) {
-                introTimelineRef.current = null;
-            }
-            unlockScroll();
-        };
+        // Clean up matchMedia on unmount
+        return () => mm.revert();
 
     }, { scope: containerRef, dependencies: [] });
 
     return (
-        // Adjusted the fallback clamp size for the credit text here as well
         <div
             ref={containerRef}
             className="relative h-[100svh] w-full overflow-hidden p-3 [--hero-credit-size:clamp(0.65rem,1.5vw,1.1rem)] [--hero-thinker-offset:8vw] [--hero-word-size:clamp(3rem,min(11.5vw,22svh),18rem)]"
@@ -267,9 +305,7 @@ const Hero = () => {
                     <span className="font-secondary text-xs md:text-sm font-bold uppercase tracking-wider text-[#F05641]">
                         Scroll to discover
                     </span>
-                    {/* Outer overflow-hidden wrapper with max-width */}
                     <div className="relative h-[2px] w-16 max-w-[64px] overflow-hidden bg-white/20">
-                        {/* Inner line that animates */}
                         <div className="scroll-line absolute left-0 top-0 h-full w-full bg-[#F05641]"></div>
                     </div>
                 </div>

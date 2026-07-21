@@ -1,14 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 import { BlockRevealText } from '@/components/normal/BlockRevealText';
 
 gsap.config({ force3D: true })
-
 
 const servicesData = [
     {
@@ -36,75 +35,88 @@ const ExpertisePage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
     const hoverImageRef = useRef<HTMLImageElement>(null);
 
-    const [activeHoverImage, setActiveHoverImage] = useState<string | null>(null);
-
     useGSAP(() => {
         if (!pageRef.current || !hoverImageRef.current) return;
 
-        gsap.config({ force3D: true });
+        // Initialize GSAP matchMedia
+        let mm = gsap.matchMedia();
 
-        gsap.set(hoverImageRef.current, { scale: 0, autoAlpha: 0 });
+        // Only run this GSAP logic on screens 768px and wider (md breakpoint)
+        mm.add("(min-width: 768px)", () => {
+            const imageEl = hoverImageRef.current;
+            const items = gsap.utils.toArray<HTMLElement>('.service-title-wrapper');
 
-        const setX = gsap.quickSetter(hoverImageRef.current, "x", "px");
-        const setY = gsap.quickSetter(hoverImageRef.current, "y", "px");
+            // Set the initial hidden state for the image safely within the matchMedia context
+            gsap.set(imageEl, { scale: 0, autoAlpha: 0 });
 
-        const onMouseMove = (e: MouseEvent) => {
-            if (!activeHoverImage) return;
+            const onMouseMove = (e: MouseEvent) => {
+                gsap.to(imageEl, {
+                    x: e.clientX,
+                    y: e.clientY,
+                    duration: 0.3,
+                    ease: "power2.out",
+                    overwrite: "auto"
+                });
+            };
 
-            gsap.to(hoverImageRef.current, {
-                x: e.clientX,
-                y: e.clientY,
-                duration: 0.3,
-                ease: "power2.out",
-                overwrite: "auto"
+            const onMouseEnter = (e: MouseEvent) => {
+                const target = e.currentTarget as HTMLElement;
+                const imgUrl = target.dataset.image; // Read the image URL from the DOM
+
+                if (imgUrl && imageEl) {
+                    imageEl.src = imgUrl; // Update image directly (skips React renders)
+                }
+
+                gsap.to(imageEl, { scale: 1, autoAlpha: 1, duration: 0.5 });
+            };
+
+            const onMouseLeave = () => {
+                gsap.to(imageEl, { scale: 0, autoAlpha: 0, duration: 0.5 });
+            };
+
+            // Attach listeners natively
+            pageRef.current?.addEventListener('mousemove', onMouseMove);
+            items.forEach(item => {
+                item.addEventListener('mouseenter', onMouseEnter);
+                item.addEventListener('mouseleave', onMouseLeave);
             });
-        };
 
-        const pageElement = pageRef.current;
-        pageElement.addEventListener('mousemove', onMouseMove);
+            // This cleanup function is automatically called by matchMedia when resizing below 768px
+            return () => {
+                pageRef.current?.removeEventListener('mousemove', onMouseMove);
+                items.forEach(item => {
+                    item.removeEventListener('mouseenter', onMouseEnter);
+                    item.removeEventListener('mouseleave', onMouseLeave);
+                });
+            };
+        });
 
-        return () => {
-            pageElement.removeEventListener('mousemove', onMouseMove);
-        };
-    }, { scope: pageRef, dependencies: [activeHoverImage] });
-
-
-    const handleMouseEnter = (imageUrl: string) => {
-        setActiveHoverImage(imageUrl);
-        gsap.to(hoverImageRef.current, { scale: 1, autoAlpha: 1, duration: 0.5 });
-    };
-
-    const handleMouseLeave = () => {
-        setActiveHoverImage(null);
-        gsap.to(hoverImageRef.current, { scale: 0, autoAlpha: 0, duration: 0.5 });
-    };
+    }, { scope: pageRef });
 
     return (
         <div ref={pageRef} className=" text-[#f4f1de] font-primary min-h-screen relative overflow-hidden px-4 md:px-12 lg:px-24">
 
             <img
                 ref={hoverImageRef}
-                src={activeHoverImage || servicesData[0].image}
+                src={servicesData[0].image} // Placeholder for first load
                 alt="Service Preview"
-                className="fixed top-0 left-0 aspect-square h-[20rem] object-contain  z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 scale-0"
+                // Removed Tailwind transitions as GSAP controls the fading now. 
+                // Kept `hidden md:block` as a safeguard so it doesn't flash on mobile before JS runs.
+                className="hidden md:block fixed top-0 left-0 aspect-square h-[20rem] object-contain z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
             />
 
             {/* --- Main Content Section --- */}
-            {/* Added w-full to ensure the main container allows flex children to stretch across the screen */}
             <main className="flex flex-col md:flex-row flex-wrap gap-12 py-12 md:py-32 md:px-0 w-full">
 
                 <BlockRevealText text='(Services)' textClassName='font-classic text-xs font-bold uppercase tracking-widest text-coral pt-3 md:sticky md:top-[10svh]' />
 
-                {/* Added flex-1 and w-full so this container spans the remaining width to allow self-start/self-end to function properly */}
                 <div className="flex flex-col gap-10 md:gap-16 flex-1 w-full">
                     {servicesData.map((service, index) => (
                         <div
                             key={index}
-                            // Replaced inline replace logic with the direct classes from the updated array. 
-                            // w-fit ensures the text block itself wraps tightly, allowing self-start/self-end to position it correctly.
+                            data-image={service.image} // Add data-image so GSAP can grab it dynamically
                             className={`service-title-wrapper w-fit px-2 md:px-0 ${service.offset}`}
-                            onMouseEnter={() => handleMouseEnter(service.image)}
-                            onMouseLeave={handleMouseLeave}
+                        // React onMouseEnter / onMouseLeave removed entirely; handled cleanly by GSAP matchMedia above
                         >
                             <BlockRevealText
                                 text={service.title}

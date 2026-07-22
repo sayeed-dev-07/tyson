@@ -1,4 +1,5 @@
 'use client'
+
 import LenisProvider from '@/providers/LenisProvider';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -13,6 +14,7 @@ gsap.config({
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <LenisProvider>
+            
             {/* The main wrapper must have the black background */}
             <div className="relative min-h-screen bg-black">
 

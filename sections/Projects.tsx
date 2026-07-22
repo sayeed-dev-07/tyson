@@ -2,69 +2,15 @@
 
 import React, { useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BlockRevealText } from '@/components/normal/BlockRevealText';
+import { projectData } from '@/public/data/projectsData';
 
-if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
-}
 
-export interface ProjectType {
-    id: string;
-    name: string;
-    type: string;
-    tech: string[];
-    live: string;
-    img: string;
-    themeColor: string;
-    textColor: string
-}
 
-export const projectData: ProjectType[] = [
-    {
-        id: 'msr-portfolio',
-        name: 'MSR Portfolio',
-        type: 'Interactive Experience',
-        tech: ['React', 'Next.js', 'GSAP', 'Lenis'],
-        live: 'https://portfolio-gules-chi-w96bn9yl4m.vercel.app/',
-        img: '/projectImg/msrImg.PNG',
-        themeColor: '#D2FF00',
-        textColor: '#0e0e0e'
-    },
-    {
-        id: 'anisearch',
-        name: 'AniSearch',
-        type: 'Web Application',
-        tech: ['React', 'Next.js', 'GSAP', 'Framer Motion', 'TanStack Query', 'Lenis', 'shadcn/ui', 'TypeScript'],
-        live: 'https://anime-vault-nextjs-ts.vercel.app/',
-        img: '/projectImg/anisearch.PNG',
-        themeColor: '#F4F1DE',
-        textColor: '#0e0e0e'
-    },
-    {
-        id: 'sellora',
-        name: 'Sellora',
-        type: 'E-commerce Platform',
-        tech: ['React', 'Next.js', 'GSAP', 'Framer Motion', 'TypeScript'],
-        live: 'https://sellora-theta.vercel.app/',
-        img: '/projectImg/sellora.PNG',
-        themeColor: '#FBA555',
-        textColor: '#0e0e0e'
-    },
-    {
-        id: 'no-good-co',
-        name: 'No Good Co.',
-        type: 'Corporate Site',
-        tech: ['React', 'Next.js', 'GSAP', 'TypeScript'],
-        live: 'https://no-good-co.vercel.app/',
-        img: '/projectImg/nogood.PNG',
-        themeColor: '#F05641',
-        textColor: '#f4f1de'
-    }
-];
 
 const Projects = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -110,20 +56,20 @@ const Projects = () => {
         // --- 3. RESPONSIVE HOVER LOGIC (The Fix) ---
         const mm = gsap.matchMedia();
 
-        // Target (isMD): Screens >= 768px (Desktop hover behavior)
         mm.add("(min-width: 768px)", () => {
+            // 1. Create an array to hold all cleanup functions
+            const cleanups: (() => void)[] = [];
+
             cards.forEach((card: any) => {
                 const hoverBg = card.querySelector('.card-hover-bg');
 
-                // Initial State: Hidden to the left
                 gsap.set(hoverBg, { xPercent: -100 });
 
-                // Create Event Listeners for Hover
                 const onMouseEnter = () => {
                     gsap.to(hoverBg, {
                         xPercent: 0,
                         duration: 0.3,
-                        ease: "cubic-bezier(0.7, 0, 0.3, 1)" // Match original CSS ease
+                        ease: "cubic-bezier(0.7, 0, 0.3, 1)"
                     });
                 };
 
@@ -135,25 +81,20 @@ const Projects = () => {
                     });
                 };
 
-                // Add Listeners
                 card.addEventListener('mouseenter', onMouseEnter);
                 card.addEventListener('mouseleave', onMouseLeave);
 
-                // Cleanup function: GSAP matchMedia handles calling this on breakpoint change
-                return () => {
+                // 2. Push the cleanup for this specific card into the array
+                cleanups.push(() => {
                     card.removeEventListener('mouseenter', onMouseEnter);
                     card.removeEventListener('mouseleave', onMouseLeave);
-                };
+                });
             });
-        });
 
-        // Target (isMobile): Screens < 768px (Always visible)
-        mm.add("(max-width: 767px)", () => {
-            cards.forEach((card: any) => {
-                const hoverBg = card.querySelector('.card-hover-bg');
-                // Force it to stay visible
-                gsap.set(hoverBg, { xPercent: 0 });
-            });
+            // 3. Return a SINGLE function that runs all cleanups when unmounting
+            return () => {
+                cleanups.forEach(cleanup => cleanup());
+            };
         });
 
     }, { scope: containerRef });
@@ -187,11 +128,7 @@ const Projects = () => {
                             // Simplified classes: Removed CSS transitions/hover here
                             className="project-card group relative block w-full outline-none overflow-hidden p-3 sm:p-4 md:p-6 lg:p-8 bg-transparent"
                         >
-                            {/* 
-                                The Background Sweep (Moved logic to GSAP)
-                                FIX: Added '.card-hover-bg' class. Removed '-translate-x-full', 
-                                'transition-transform', 'duration-500', 'ease...', and 'group-hover:translate-x-0'
-                            */}
+
                             <div
                                 className="card-hover-bg absolute inset-0 origin-left z-0"
                                 style={{ backgroundColor: project.themeColor }}

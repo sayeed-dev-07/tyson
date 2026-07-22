@@ -39,7 +39,7 @@ const ExpertisePage = () => {
         if (!pageRef.current || !hoverImageRef.current) return;
 
         // Initialize GSAP matchMedia
-        let mm = gsap.matchMedia();
+        const mm = gsap.matchMedia();
 
         // Only run this GSAP logic on screens 768px and wider (md breakpoint)
         mm.add("(min-width: 768px)", () => {
@@ -102,7 +102,7 @@ const ExpertisePage = () => {
                 alt="Service Preview"
                 // Removed Tailwind transitions as GSAP controls the fading now. 
                 // Kept `hidden md:block` as a safeguard so it doesn't flash on mobile before JS runs.
-                className="hidden md:block fixed top-0 left-0 aspect-square h-[20rem] object-contain z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                className="hidden  md:block fixed top-0 left-0 aspect-square h-[20rem] object-contain z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
             />
 
             {/* --- Main Content Section --- */}

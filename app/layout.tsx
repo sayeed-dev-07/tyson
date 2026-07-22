@@ -5,6 +5,7 @@ import ClientLayout from "@/layouts/ClientLayout";
 import localFont from 'next/font/local'
 
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -42,10 +43,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${thinFont.variable} ${mediumFont.variable} ${boldFont.variable} h-full antialiased`}
+
     >
       <body className="min-h-full flex flex-col">
 
         <ClientLayout>
+
           {children}
         </ClientLayout>
 

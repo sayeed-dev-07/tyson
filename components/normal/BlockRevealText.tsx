@@ -5,9 +5,6 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
 
-
-
-
 gsap.config({
     force3D: true
 });
@@ -32,12 +29,14 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
         if (!textRef.current) return;
 
         // 1. Split the text into separate line elements using GSAP SplitText
-        // Note: GSAP uses 'type' (singular) instead of 'types'
         const split = new SplitText(textRef.current, { type: 'lines' });
 
         // 2. Prepare each line wrapper and inject the colored block
         if (split.lines) {
-            split.lines.forEach((line) => {
+            split.lines.forEach((el) => {
+                // Assert the type to HTMLElement
+                const line = el as HTMLElement; 
+
                 // Force the line div to only be as wide as the text inside it
                 line.style.width = 'fit-content';
                 line.style.position = 'relative';

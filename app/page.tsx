@@ -1,5 +1,6 @@
 
 import ScrollToTop from '@/components/normal/ScrollToTop';
+import Navbar from '@/components/shared/Navbar';
 import About from '@/sections/About';
 import ContactPage from '@/sections/Contact';
 import Hero from '@/sections/Hero';
@@ -14,7 +15,7 @@ import React from 'react';
 const page = () => {
   return (
     <>
-
+      <Navbar />
       <Hero />
 
       <About />

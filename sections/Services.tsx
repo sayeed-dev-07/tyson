@@ -89,7 +89,7 @@ const ExpertisePage = () => {
     }, { scope: pageRef });
 
     return (
-        <div ref={pageRef} className=" text-[#f4f1de] font-primary min-h-screen relative overflow-hidden px-4 md:px-12 lg:px-24">
+        <div ref={pageRef} id='services' className=" text-[#f4f1de] font-primary min-h-screen relative overflow-hidden px-4 md:px-12 lg:px-24">
 
             <img
                 ref={hoverImageRef}

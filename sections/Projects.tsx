@@ -100,7 +100,7 @@ const Projects = () => {
     }, { scope: containerRef });
 
     return (
-        <section ref={containerRef} className="w-full px-3 sm:px-8 font-primary py-24 md:py-32">
+        <section id='projects' ref={containerRef} className="w-full px-3 sm:px-8 font-primary py-24 md:py-32">
 
             {/* --- INTRO SECTION --- */}
             <div className="projects-intro mb-20">

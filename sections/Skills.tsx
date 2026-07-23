@@ -59,7 +59,7 @@ const skillsData = [
 
 const SkillsPage = () => {
     return (
-        <section className="w-full min-h-screen  font-classic  py-24 md:py-32 px-3 sm:px-12 ">
+        <section id='skills' className="w-full min-h-screen  font-classic  py-24 md:py-32 px-3 sm:px-12 ">
 
             <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
 

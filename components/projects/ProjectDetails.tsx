@@ -63,7 +63,7 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
     return (
         <div
             style={customStyles}
-            className='min-h-screen px-4 sm:px-6 mt-12 md:px-8 lg:px-12 xl:px-20 py-12 md:py-20 flex flex-col lg:flex-row gap-12 lg:gap-16'
+            className='min-h-screen px-4 sm:px-6  md:px-8 lg:px-12 xl:px-20 py-20 md:py-30 flex flex-col lg:flex-row gap-4 lg:gap-8'
         >
             {/* LEFT COLUMN: Project Info */}
             <div className="w-full lg:w-1/3 flex flex-col gap-10 mt-4">
@@ -90,7 +90,7 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
                 </div>
 
                 {/* Info Categories */}
-                <div className="flex font-classic flex-col gap-8">
+                <div className="flex font-classic flex-col gap-3">
                     {/* Category Block */}
                     <div className="flex flex-col gap-3">
                         <span className="text-xs font-semibold uppercase tracking-widest text-[#F4F1DE] opacity-90">

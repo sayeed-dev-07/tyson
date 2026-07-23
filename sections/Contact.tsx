@@ -115,7 +115,7 @@ const Contact: React.FC = () => {
     }, { scope: container });
 
     return (
-        <div ref={container} className='py-10 px-4 sm:px-12 min-h-screen flex flex-col justify-center '>
+        <div ref={container} id='contact' className='py-10 px-4 sm:px-12 min-h-screen flex flex-col justify-center '>
 
             {/* Heading Section */}
             <div className='flex flex-col uppercase items-center gap-y-4 leading-[0.9] font-primary text-coral' style={{ fontSize: "clamp(3rem, 10vw, 9rem)" }}>

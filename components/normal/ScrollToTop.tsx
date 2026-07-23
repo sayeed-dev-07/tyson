@@ -11,7 +11,7 @@ const ScrollToTop = () => {
     const buttonRef = useRef<HTMLDivElement>(null)
     const bgColorRef = useRef<HTMLDivElement>(null)
     const tl = useRef<GSAPTimeline | null>(null)
-    
+
     // State to track if the user has scrolled past 200px
     const [isVisible, setIsVisible] = useState(false)
 
@@ -52,15 +52,14 @@ const ScrollToTop = () => {
     }
 
     return (
-        <div 
+        <div
             onClick={handleScrollToTop}
-            onMouseEnter={mouseHoverIn} 
-            onMouseLeave={mouseHoverOut} 
-            ref={buttonRef} 
+            onMouseEnter={mouseHoverIn}
+            onMouseLeave={mouseHoverOut}
+            ref={buttonRef}
             // Added Tailwind transition, opacity, pointer-events, and translate-y for a smooth fade up
-            className={`fixed sm:bottom-10 border cursor-pointer overflow-hidden sm:right-10 right-5 bottom-5 z-99 transition-all duration-300 ease-out ${
-                isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
+            className={`fixed sm:bottom-10 border cursor-pointer overflow-hidden sm:right-10 right-5 bottom-5 z-98 transition-all duration-300 ease-out ${isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+                }`}
         >
             <div ref={bgColorRef} className='bg-foreground -translate-x-full absolute h-full w-full z-5'></div>
             <div className='relative text-coral flex flex-col items-center justify-center font-semibold lowercase px-3 py-1 -gap-y-2 text-xs font-classic z-10 leading-3.5'>

@@ -104,7 +104,7 @@ const About = () => {
     }, { scope: aboutRef });
 
     return (
-        <section
+        <section id='about'
             ref={aboutRef}
             className="min-h-screen flex items-center justify-center relative py-20 px-4 overflow-hidden"
         >

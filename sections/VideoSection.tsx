@@ -8,7 +8,7 @@ import { BlockRevealText } from "@/components/normal/BlockRevealText";
 
 gsap.config({
     force3D: true
-})
+});
 
 export default function CanvasSequence() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +27,9 @@ export default function CanvasSequence() {
     const IMAGE_BASE_URL = "/frames/";
 
     useEffect(() => {
+        // 1. ADDED: isMounted flag to prevent async race conditions on route change
+        let isMounted = true;
+
         const canvas = canvasRef.current;
         const container = containerRef.current;
         const overlay = overlayRef.current;
@@ -53,13 +56,16 @@ export default function CanvasSequence() {
                 const response = await fetch(getFrameUrl(index));
                 const blob = await response.blob();
                 const imageBitmap = await createImageBitmap(blob);
-                imagesRef.current[index] = imageBitmap;
+                if (isMounted) {
+                    imagesRef.current[index] = imageBitmap;
+                }
             } catch (error) {
                 console.error(`Error loading frame ${index}:`, error);
             }
         };
 
         const render = () => {
+            if (!isMounted) return;
             const currentFrameIndex = Math.round(seqRef.current.frame);
             const img = imagesRef.current[currentFrameIndex];
 
@@ -82,16 +88,20 @@ export default function CanvasSequence() {
                 }, 1));
 
             const loadNextBatch: IdleRequestCallback = (deadline) => {
+                if (!isMounted) return; // Stop loading if page unmounts
+
                 while (deadline.timeRemaining() > 0 && currentIndex < TOTAL_FRAMES) {
                     void loadFrame(currentIndex);
                     currentIndex++;
                 }
-                if (currentIndex < TOTAL_FRAMES) {
+                if (currentIndex < TOTAL_FRAMES && isMounted) {
                     requestIdle(loadNextBatch);
                 }
             };
 
-            requestIdle(loadNextBatch);
+            if (isMounted) {
+                requestIdle(loadNextBatch);
+            }
         };
 
         const initSequence = async () => {
@@ -100,6 +110,8 @@ export default function CanvasSequence() {
                 initialPromises.push(loadFrame(i));
             }
             await Promise.all(initialPromises);
+
+            if (!isMounted) return; // Abort GSAP setup if component unmounted during load
 
             render();
 
@@ -111,9 +123,7 @@ export default function CanvasSequence() {
                         scrub: 0.5,
                         start: "top top",
                         end: "+=400%",
-                        // Watch the scroll progress and update our React state
                         onUpdate: (self) => {
-                            // If we pass the 80% mark, show the text. Otherwise, hide it.
                             setShowText(self.progress >= 0.8);
                         }
                     }
@@ -140,55 +150,57 @@ export default function CanvasSequence() {
         initSequence();
 
         return () => {
+            isMounted = false; // Flag component as unmounted
             ctxGsap.revert();
         };
     }, []);
 
     return (
-        <div
-            ref={containerRef}
-            className="relative h-screen w-full max-w-full overflow-hidden bg-black"
-            style={{ width: "100%", maxWidth: "100%", height: "100vh", position: "relative", overflow: "hidden", backgroundColor: "#000" }}
-        >
-            <canvas
-                ref={canvasRef}
-                className="block h-screen w-full max-w-full object-cover"
-                style={{ width: "100%", maxWidth: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-
+        // 2. ADDED: The Pin Protector div. React tracks this, GSAP pins the inner div.
+        <div className="canvas-pin-protector w-full">
             <div
-                ref={overlayRef}
-                className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 text-white text-center invisible px-4"
+                ref={containerRef}
+                className="relative h-screen w-full max-w-full overflow-hidden bg-black"
+                style={{ width: "100%", maxWidth: "100%", height: "100vh", position: "relative", overflow: "hidden", backgroundColor: "#000" }}
             >
-                {/* Conditionally render the text so the animation fires right when it becomes visible */}
-                {showText && (
-                    <>
-                        {/* SPLIT TEXT INTO TWO LINES FOR PERFECT CENTERING */}
-                        <div className="flex flex-col items-center justify-center mb-8 gap-y-2">
-                            <BlockRevealText
-                                text="thanks for"
-                                textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
-                            />
-                            <BlockRevealText
-                                text="visiting"
-                                textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
-                            />
-                        </div>
+                <canvas
+                    ref={canvasRef}
+                    className="block h-screen w-full max-w-full object-cover"
+                    style={{ width: "100%", maxWidth: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
 
-                        <div className="flex flex-col text-center items-center gap-y-3 mt-6">
-                            <BlockRevealText
-                                blockColor="#f4f1de"
-                                text="coded by"
-                                textClassName="text-xs md:text-sm tracking-[0.4em] uppercase text-gray-400 font-classic font-light"
-                            />
-                            <BlockRevealText
-                                blockColor="#f4f1de"
-                                text="sayed shorif"
-                                textClassName="text-2xl md:text-3xl tracking-widest capitalize font-secondary text-orange-50"
-                            />
-                        </div>
-                    </>
-                )}
+                <div
+                    ref={overlayRef}
+                    className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 text-white text-center invisible px-4"
+                >
+                    {showText && (
+                        <>
+                            <div className="flex flex-col items-center justify-center mb-8 gap-y-2">
+                                <BlockRevealText
+                                    text="thanks for"
+                                    textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
+                                />
+                                <BlockRevealText
+                                    text="visiting"
+                                    textClassName="text-5xl md:text-7xl font-primary uppercase text-coral text-center"
+                                />
+                            </div>
+
+                            <div className="flex flex-col text-center items-center gap-y-3 mt-6">
+                                <BlockRevealText
+                                    blockColor="#f4f1de"
+                                    text="coded by"
+                                    textClassName="text-xs md:text-sm tracking-[0.4em] uppercase text-gray-400 font-classic font-light"
+                                />
+                                <BlockRevealText
+                                    blockColor="#f4f1de"
+                                    text="sayed shorif"
+                                    textClassName="text-2xl md:text-3xl tracking-widest capitalize font-secondary text-orange-50"
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -173,7 +173,7 @@ export const projectData: ProjectType[] = [
     },
 
     {
-        id: 'erakit landing',
+        id: 'erakit-landing',
         name: 'EraKit Landing',
         type: 'Landing Page',
         tech: [

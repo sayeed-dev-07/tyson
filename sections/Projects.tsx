@@ -137,12 +137,12 @@ const Projects = () => {
                             {/* Card Image */}
                             <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#111] z-10">
                                 <div className="img-cover absolute inset-0 z-20 pointer-events-none" style={{ backgroundColor: project.themeColor }} />
-                                <div className="absolute inset-0 bg-black/40 z-10 mix-blend-multiply pointer-events-none transition-opacity duration-500 group-hover:opacity-10" />
+                                
                                 <Image
                                     src={project.img}
                                     alt={project.name}
                                     fill
-                                    className="object-cover object-top opacity-90 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105 group-hover:opacity-100"
+                                    className="object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105 "
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             </div>

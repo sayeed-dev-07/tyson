@@ -26,16 +26,22 @@ const Hero = () => {
     const hasPreloaderCompletedRef = useRef(false);
     const [showPreloader, setShowPreloader] = useState(true);
 
+    // 1. Check session storage instantly before paint to prevent Preloader FOUC
+    useLayoutEffect(() => {
+        if (typeof window !== 'undefined' && sessionStorage.getItem('hero-animated') === 'true') {
+            setShowPreloader(false);
+            hasPreloaderCompletedRef.current = true;
+        }
+    }, []);
+
     const startHeroIntro = useCallback(() => {
         hasPreloaderCompletedRef.current = true;
         setShowPreloader(false);
-        // This will safely do nothing on mobile since introTimelineRef is null
         introTimelineRef.current?.play(0);
     }, []);
 
     useEffect(() => {
         lenisRef.current = lenis;
-
         if (isScrollLockedRef.current) {
             lenis?.stop();
         }
@@ -46,6 +52,7 @@ const Hero = () => {
         if (!container) return;
 
         const calculateWordSize = () => {
+            // ... (Your existing calculateWordSize logic remains exactly the same)
             const firstWord = container.querySelector<HTMLElement>('.word');
             const credit = container.querySelector<HTMLElement>('.creator-credit');
             const stage = container.querySelector<HTMLElement>('.hero-copy');
@@ -129,6 +136,15 @@ const Hero = () => {
         const previousHtmlOverflow = html.style.overflow;
         const previousBodyOverflow = body.style.overflow;
 
+        // 2. Check if animation has already played this session
+        const hasPlayed = sessionStorage.getItem('hero-animated') === 'true';
+
+        // 3. Unhide the containers instantly to prevent FOUC (combines with opacity-0 in JSX)
+        gsap.set('.hero-copy', { opacity: 1 });
+        if (hasPlayed) {
+            gsap.set('.scroll-indicator', { opacity: 1, autoAlpha: 1 });
+        }
+
         const lockScroll = () => {
             isScrollLockedRef.current = true;
             lenisRef.current?.stop();
@@ -143,18 +159,39 @@ const Hero = () => {
             body.style.overflow = previousBodyOverflow;
         };
 
-        // Initialize GSAP MatchMedia
         const mm = gsap.matchMedia();
 
         // -----------------------------
         // DESKTOP / TABLET (md and up)
         // -----------------------------
         mm.add("(min-width: 768px)", () => {
+            if (hasPlayed) {
+                // Instantly set elements to their final states on refresh
+                unlockScroll();
+                gsap.set('.word-wrapper', { height: 'auto' });
+                gsap.set('.word', {
+                    scale: 1, opacity: 1, y: 0, xPercent: 0, marginLeft: 0
+                });
+                gsap.set('.creator-credit', { autoAlpha: 1, x: 0 });
+                gsap.set('.word-thinker', {
+                    marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset')
+                });
+                
+                if (containerRef.current) {
+                    containerRef.current.dataset.creatorShown = 'true';
+                }
+                return; // Exit here, don't build the timeline
+            }
+
             lockScroll();
 
             const tl = gsap.timeline({
                 paused: true,
-                onComplete: unlockScroll,
+                onComplete: () => {
+                    unlockScroll();
+                    // 4. Mark animation as completed for future refreshes
+                    sessionStorage.setItem('hero-animated', 'true');
+                },
             });
 
             introTimelineRef.current = tl;
@@ -235,31 +272,28 @@ const Hero = () => {
             unlockScroll();
             introTimelineRef.current = null;
 
-            // Immediately set all elements to their finished animated state
+            // Instantly jump to final state on mobile
             gsap.set('.word-wrapper', { height: 'auto' });
             gsap.set('.scroll-indicator', { autoAlpha: 1 });
             gsap.set('.word', {
-                scale: 1,
-                opacity: 1,
-                y: 0,
-                xPercent: 0,
-                marginLeft: 0, // Overrides the Tailwind ml-[50vw]
-                transformOrigin: 'center center'
+                scale: 1, opacity: 1, y: 0, xPercent: 0, marginLeft: 0, transformOrigin: 'center center'
             });
             gsap.set('.word-thinker', {
                 marginLeft: () => getComputedStyle(containerRef.current!).getPropertyValue('--hero-thinker-offset')
             });
             gsap.set('.creator-credit', {
-                autoAlpha: 1,
-                x: 0,
+                autoAlpha: 1, x: 0,
             });
 
             if (containerRef.current) {
                 containerRef.current.dataset.creatorShown = 'true';
             }
+            
+            // Mark complete on mobile too
+            sessionStorage.setItem('hero-animated', 'true');
         });
 
-        // Infinite animation for the scroll line (runs on both mobile and desktop)
+        // Infinite scroll line runs no matter what
         gsap.to('.scroll-line', {
             xPercent: 100,
             repeat: -1,
@@ -268,7 +302,6 @@ const Hero = () => {
             startAt: { xPercent: -100 }
         });
 
-        // Clean up matchMedia on unmount
         return () => mm.revert();
 
     }, { scope: containerRef, dependencies: [] });
@@ -279,8 +312,9 @@ const Hero = () => {
             className="relative h-[100svh] w-full overflow-hidden p-3 [--hero-credit-size:clamp(0.65rem,1.5vw,1.1rem)] [--hero-thinker-offset:8vw] [--hero-word-size:clamp(3rem,min(11.5vw,22svh),18rem)]"
         >
             <div className="relative w-full h-full">
+                {/* 5. Added opacity-0 here to prevent initial FOUC */}
                 <div
-                    className="hero-copy absolute inset-0 bottom-[5svh] flex max-h-[90svh] w-full flex-col justify-end"
+                    className="hero-copy opacity-0 absolute inset-0 bottom-[5svh] flex max-h-[90svh] w-full flex-col justify-end"
                 >
                     {words.map((word, index) => (
                         <div
@@ -300,8 +334,8 @@ const Hero = () => {
                     ))}
                 </div>
 
-                {/* --- SCROLL TO DISCOVER TEXT & ANIMATED LINE --- */}
-                <div className="scroll-indicator absolute bottom-4 right-4 md:bottom-2 md:right-8 flex items-center gap-3 z-20">
+                {/* 5. Added opacity-0 here as well */}
+                <div className="scroll-indicator opacity-0 absolute bottom-4 right-4 md:bottom-2 md:right-8 flex items-center gap-3 z-20">
                     <span className="font-secondary text-xs md:text-sm font-bold uppercase tracking-wider text-[#F05641]">
                         Scroll to discover
                     </span>

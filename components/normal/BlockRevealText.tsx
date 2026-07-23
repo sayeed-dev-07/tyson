@@ -3,18 +3,20 @@
 import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { SplitText } from 'gsap/SplitText';
 
-import SplitType from 'split-type';
+
+
 
 gsap.config({
     force3D: true
-})
+});
 
 interface BlockRevealTextProps {
     text: string;
     textClassName?: string;
     containerClassName?: string;
-    blockColor?: string; // Added as a prop for easy reusability
+    blockColor?: string;
 }
 
 export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
@@ -29,8 +31,9 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
     useGSAP(() => {
         if (!textRef.current) return;
 
-        // 1. Split the text into separate line elements
-        const split = new SplitType(textRef.current, { types: 'lines' });
+        // 1. Split the text into separate line elements using GSAP SplitText
+        // Note: GSAP uses 'type' (singular) instead of 'types'
+        const split = new SplitText(textRef.current, { type: 'lines' });
 
         // 2. Prepare each line wrapper and inject the colored block
         if (split.lines) {
@@ -69,7 +72,7 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
         return () => {
             split.revert();
         };
-    }, { scope: containerRef, dependencies: [text] }); // Re-run if text prop changes
+    }, { scope: containerRef, dependencies: [text] });
 
     return (
         <div ref={containerRef} className={`relative w-fit ${containerClassName}`}>

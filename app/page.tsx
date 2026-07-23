@@ -1,3 +1,4 @@
+
 import ScrollToTop from '@/components/normal/ScrollToTop';
 import About from '@/sections/About';
 import ContactPage from '@/sections/Contact';
@@ -13,6 +14,7 @@ import React from 'react';
 const page = () => {
   return (
     <>
+
       <Hero />
 
       <About />
@@ -23,8 +25,8 @@ const page = () => {
       <ContactPage />
       <CanvasSequence />
       <ScrollToTop />
+    </ >
 
-    </>
   );
 };
 

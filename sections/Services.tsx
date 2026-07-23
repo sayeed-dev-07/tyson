@@ -38,15 +38,12 @@ const ExpertisePage = () => {
     useGSAP(() => {
         if (!pageRef.current || !hoverImageRef.current) return;
 
-        // Initialize GSAP matchMedia
         const mm = gsap.matchMedia();
 
-        // Only run this GSAP logic on screens 768px and wider (md breakpoint)
         mm.add("(min-width: 768px)", () => {
             const imageEl = hoverImageRef.current;
             const items = gsap.utils.toArray<HTMLElement>('.service-title-wrapper');
 
-            // Set the initial hidden state for the image safely within the matchMedia context
             gsap.set(imageEl, { scale: 0, autoAlpha: 0 });
 
             const onMouseMove = (e: MouseEvent) => {
@@ -61,10 +58,10 @@ const ExpertisePage = () => {
 
             const onMouseEnter = (e: MouseEvent) => {
                 const target = e.currentTarget as HTMLElement;
-                const imgUrl = target.dataset.image; // Read the image URL from the DOM
+                const imgUrl = target.dataset.image;
 
                 if (imgUrl && imageEl) {
-                    imageEl.src = imgUrl; // Update image directly (skips React renders)
+                    imageEl.src = imgUrl;
                 }
 
                 gsap.to(imageEl, { scale: 1, autoAlpha: 1, duration: 0.5 });
@@ -74,14 +71,12 @@ const ExpertisePage = () => {
                 gsap.to(imageEl, { scale: 0, autoAlpha: 0, duration: 0.5 });
             };
 
-            // Attach listeners natively
             pageRef.current?.addEventListener('mousemove', onMouseMove);
             items.forEach(item => {
                 item.addEventListener('mouseenter', onMouseEnter);
                 item.addEventListener('mouseleave', onMouseLeave);
             });
 
-            // This cleanup function is automatically called by matchMedia when resizing below 768px
             return () => {
                 pageRef.current?.removeEventListener('mousemove', onMouseMove);
                 items.forEach(item => {
@@ -98,11 +93,10 @@ const ExpertisePage = () => {
 
             <img
                 ref={hoverImageRef}
-                src={servicesData[0].image} // Placeholder for first load
+                src={servicesData[0].image}
                 alt="Service Preview"
-                // Removed Tailwind transitions as GSAP controls the fading now. 
-                // Kept `hidden md:block` as a safeguard so it doesn't flash on mobile before JS runs.
-                className="hidden  md:block fixed top-0 left-0 aspect-square h-[20rem] object-contain z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform"
+                // ADDED opacity-0, invisible, scale-0 HERE
+                className="hidden md:block fixed top-0 left-0 aspect-square h-[20rem] object-contain z-50 pointer-events-none -translate-x-1/2 -translate-y-1/2 will-change-transform opacity-0 invisible scale-0"
             />
 
             {/* --- Main Content Section --- */}
@@ -114,9 +108,8 @@ const ExpertisePage = () => {
                     {servicesData.map((service, index) => (
                         <div
                             key={index}
-                            data-image={service.image} // Add data-image so GSAP can grab it dynamically
+                            data-image={service.image}
                             className={`service-title-wrapper w-fit px-2 md:px-0 ${service.offset}`}
-                        // React onMouseEnter / onMouseLeave removed entirely; handled cleanly by GSAP matchMedia above
                         >
                             <BlockRevealText
                                 text={service.title}

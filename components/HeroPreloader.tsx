@@ -72,7 +72,7 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
 
     return (
         <div
-            className={`fixed z-999 top-0 left-0 inset-0  flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-500 ease-out ${isLeaving ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            className={`fixed z-999 top-0 left-0 inset-0 z-50 flex items-center justify-center bg-[#0a0a0a] transition-opacity duration-500 ease-out ${isLeaving ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
             <div className="h-1 w-24 overflow-hidden bg-white/15">
                 <div className="h-full w-full origin-left animate-[hero-preloader_0.9s_ease-in-out_infinite] bg-[#F05641]" />

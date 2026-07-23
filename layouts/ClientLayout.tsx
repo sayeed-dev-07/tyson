@@ -1,5 +1,6 @@
 'use client'
 
+import AnimatedLogo from '@/components/normal/Logo';
 import LenisProvider from '@/providers/LenisProvider';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,7 +15,7 @@ gsap.config({
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <LenisProvider>
-            
+
             {/* The main wrapper must have the black background */}
             <div className="relative min-h-screen bg-black">
 
@@ -38,6 +39,9 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
 
                 {/* main content  */}
                 <div className='relative z-20'>
+                    <div className='fixed top-[3%] left-[2%] z-100'>
+                        <AnimatedLogo />
+                    </div>
                     {children}
                 </div>
 

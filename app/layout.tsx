@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/layouts/ClientLayout";
 import localFont from 'next/font/local'
+import { FlipTransitionProvider } from "@/providers/utils/FlipTransitionProvider";
 
 
 
@@ -47,10 +48,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
 
-        <ClientLayout>
-
-          {children}
-        </ClientLayout>
+        <FlipTransitionProvider>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </FlipTransitionProvider>
 
       </body>
     </html>

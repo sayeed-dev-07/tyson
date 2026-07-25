@@ -70,7 +70,7 @@ export const projectData: ProjectType[] = [
             'EmailJS'
         ],
         live: 'https://portfolio-gules-chi-w96bn9yl4m.vercel.app/',
-        img: '/projectImg/msrImg.webp',
+        img: '/projectImg/msrimg.webp',
         themeColor: '#D2FF00',
         textColor: '#0e0e0e',
         projectType: 'commercial'

@@ -2,21 +2,40 @@
 
 import React, { useRef } from 'react';
 import gsap from 'gsap';
-
 import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BlockRevealText } from '@/components/normal/BlockRevealText';
 import { projectData } from '@/public/data/projectsData';
-
-
-
+import { useFlipTransition } from '@/providers/utils/FlipTransitionProvider';
 
 const Projects = () => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+    const { startTransition } = useFlipTransition();
+    const imgRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+    const handleCardClick = (e: React.MouseEvent, project: typeof projectData[number]) => {
+        e.preventDefault();
+        const imgEl = imgRefs.current.get(project.id);
+        if (!imgEl) return;
+
+        // Only pass the image rectangle for the flip transition
+        startTransition({
+            id: String(project.id),
+            imgSrc: project.img,
+            name: project.name,
+            imgRect: imgEl.getBoundingClientRect(),
+        });
+
+        requestAnimationFrame(() => {
+            router.push(`/projects/${project.id}`);
+        });
+    };
 
     useGSAP(() => {
-        // --- 1. INTRO ANIMATIONS (Unchanged) ---
+        // --- 1. INTRO ANIMATIONS ---
         const introCovers = gsap.utils.toArray('.intro-cover');
         gsap.set(introCovers, { clipPath: 'inset(0% 0% 0% 0%)' });
 
@@ -31,7 +50,7 @@ const Projects = () => {
             ease: "power3.inOut"
         });
 
-        // --- 2. GRID CARD SCROLL REVEAL (Unchanged) ---
+        // --- 2. GRID CARD SCROLL REVEAL ---
         const cards = gsap.utils.toArray('.project-card');
 
         cards.forEach((card: any) => {
@@ -53,11 +72,10 @@ const Projects = () => {
             })
         });
 
-        // --- 3. RESPONSIVE HOVER LOGIC (The Fix) ---
+        // --- 3. RESPONSIVE HOVER LOGIC ---
         const mm = gsap.matchMedia();
 
         mm.add("(min-width: 768px)", () => {
-            // 1. Create an array to hold all cleanup functions
             const cleanups: (() => void)[] = [];
 
             cards.forEach((card: any) => {
@@ -84,14 +102,12 @@ const Projects = () => {
                 card.addEventListener('mouseenter', onMouseEnter);
                 card.addEventListener('mouseleave', onMouseLeave);
 
-                // 2. Push the cleanup for this specific card into the array
                 cleanups.push(() => {
                     card.removeEventListener('mouseenter', onMouseEnter);
                     card.removeEventListener('mouseleave', onMouseLeave);
                 });
             });
 
-            // 3. Return a SINGLE function that runs all cleanups when unmounting
             return () => {
                 cleanups.forEach(cleanup => cleanup());
             };
@@ -123,9 +139,9 @@ const Projects = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12">
                     {projectData.map((project) => (
                         <Link
+                            onClick={(e) => handleCardClick(e, project)}
                             href={`/projects/${project.id}`}
                             key={project.id}
-                            // Simplified classes: Removed CSS transitions/hover here
                             className="project-card group relative block w-full outline-none overflow-hidden p-3 sm:p-4 md:p-6 lg:p-8 bg-transparent"
                         >
 
@@ -135,9 +151,12 @@ const Projects = () => {
                             />
 
                             {/* Card Image */}
-                            <div className="relative w-full aspect-[16/10] overflow-hidden bg-[#111] z-10">
+                            <div
+                                ref={(el) => { if (el) imgRefs.current.set(String(project.id), el); }}
+                                className="relative w-full aspect-[16/10] overflow-hidden bg-[#111] z-10"
+                            >
                                 <div className="img-cover absolute inset-0 z-20 pointer-events-none" style={{ backgroundColor: project.themeColor }} />
-                                
+
                                 <Image
                                     src={project.img}
                                     alt={project.name}
@@ -147,16 +166,20 @@ const Projects = () => {
                                 />
                             </div>
 
-                            {/* Overlapping Labels */}
+                            {/* Overlapping Labels (Removed refs since they won't animate) */}
                             <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 lg:bottom-8 lg:right-8 flex flex-col items-end z-20 pointer-events-none">
-                                {/* Title Block */}
-                                <div className="relative overflow-hidden w-max " style={{ backgroundColor: project.themeColor }}>
+                                <div
+                                    className="relative overflow-hidden w-max"
+                                    style={{ backgroundColor: project.themeColor }}
+                                >
                                     <h2 className="relative z-10 px-4 py-2 md:px-5 md:py-3 text-lg md:text-2xl lg:text-3xl font-black uppercase leading-none tracking-tighter m-0" style={{ color: project.textColor }}>
                                         {project.name}
                                     </h2>
                                 </div>
-                                {/* Type / Category Block */}
-                                <div className="relative overflow-hidden w-max" style={{ backgroundColor: project.themeColor }}>
+                                <div
+                                    className="relative overflow-hidden w-max"
+                                    style={{ backgroundColor: project.themeColor }}
+                                >
                                     <h3 className="relative z-10 px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-bold uppercase leading-none tracking-widest m-0" style={{ color: project.textColor }}>
                                         {project.type}
                                     </h3>

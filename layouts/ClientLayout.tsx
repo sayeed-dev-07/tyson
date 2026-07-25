@@ -40,7 +40,7 @@ const ClientLayout = ({ children }: { children: React.ReactNode }) => {
 
                 {/* main content  */}
                 <div className='relative z-20'>
-                    
+
                     <div className='fixed top-[3%] left-[2%] z-100'>
                         <AnimatedLogo />
                     </div>

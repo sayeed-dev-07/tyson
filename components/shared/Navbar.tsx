@@ -11,7 +11,7 @@ const navItems = [
     { name: 'Services', href: '#services', isExternal: false },
     { name: 'Skills', href: '#skills', isExternal: false },
     { name: 'Contact', href: '#contact', isExternal: false },
-    { name: 'CV', href: '/dummy-cv.pdf', isExternal: true },
+    { name: 'CV', href: 'https://drive.google.com/file/d/1aEyprF6TKUzyZ3-WnvX38I-a1xxiQHUr/view?usp=sharing', isExternal: true },
 ];
 
 const Navbar = () => {

@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { BlockRevealText } from '@/components/normal/BlockRevealText';
 import { projectData } from '@/public/data/projectsData';
 import { useFlipTransition } from '@/providers/utils/FlipTransitionProvider';
@@ -15,13 +16,13 @@ const Projects = () => {
     const router = useRouter();
     const { startTransition } = useFlipTransition();
     const imgRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+    const cursorRef = useRef<HTMLDivElement>(null);
 
     const handleCardClick = (e: React.MouseEvent, project: typeof projectData[number]) => {
         e.preventDefault();
         const imgEl = imgRefs.current.get(project.id);
         if (!imgEl) return;
 
-        // Only pass the image rectangle for the flip transition
         startTransition({
             id: String(project.id),
             imgSrc: project.img,
@@ -35,8 +36,10 @@ const Projects = () => {
     };
 
     useGSAP(() => {
+        const cursor = cursorRef.current;
+
         // --- 1. INTRO ANIMATIONS ---
-        const introCovers = gsap.utils.toArray('.intro-cover');
+        const introCovers = gsap.utils.toArray<HTMLElement>('.intro-cover');
         gsap.set(introCovers, { clipPath: 'inset(0% 0% 0% 0%)' });
 
         gsap.to(introCovers, {
@@ -51,10 +54,11 @@ const Projects = () => {
         });
 
         // --- 2. GRID CARD SCROLL REVEAL ---
-        const cards = gsap.utils.toArray('.project-card');
+        const cards = gsap.utils.toArray<HTMLElement>('.project-card');
 
-        cards.forEach((card: any) => {
+        cards.forEach((card) => {
             const imgCover = card.querySelector('.img-cover');
+            if (!imgCover) return;
             gsap.set(imgCover, { clipPath: 'inset(0% 0% 0% 0%)' });
 
             const tl = gsap.timeline({
@@ -78,8 +82,86 @@ const Projects = () => {
         mm.add("(min-width: 768px)", () => {
             const cleanups: (() => void)[] = [];
 
-            cards.forEach((card: any) => {
+            if (cursor) {
+                // Set initial state
+                gsap.set(cursor, {
+                    autoAlpha: 0,
+                    scale: 0,
+                    xPercent: -50,
+                    yPercent: -50,
+                    transformOrigin: "center center"
+                });
+
+                // Set up snappy tracking
+                const xTo = gsap.quickTo(cursor, "x", { duration: 0.25, ease: "power3" });
+                const yTo = gsap.quickTo(cursor, "y", { duration: 0.25, ease: "power3" });
+
+                const onMouseMove = (e: MouseEvent) => {
+                    xTo(e.clientX);
+                    yTo(e.clientY);
+                };
+
+                // FIX: Bind mousemove to 'window' instead of 'containerRef'
+                // This ensures the cursor never gets stuck on the edge if tracking drops
+                window.addEventListener('mousemove', onMouseMove);
+                cleanups.push(() => window.removeEventListener('mousemove', onMouseMove));
+
+                const onCursorEnter = (e: MouseEvent) => {
+                    const target = e.currentTarget as HTMLElement;
+
+                    cursor.style.setProperty('--cursor-bg', target.dataset.themeColor ?? '#D2FF00');
+                    cursor.style.setProperty('--cursor-fg', target.dataset.textColor ?? '#0e0e0e');
+
+                    // Instantly snap to position so it doesn't fly in from the left
+                    xTo(e.clientX);
+                    yTo(e.clientY);
+
+                    gsap.to(cursor, {
+                        scale: 1,
+                        autoAlpha: 1,
+                        duration: 0.4,
+                        ease: "back.out(1.5)", // Added a slight pop effect
+                        overwrite: "auto"
+                    });
+                };
+
+                const onCursorLeave = () => {
+                    gsap.to(cursor, {
+                        scale: 0,
+                        autoAlpha: 0,
+                        duration: 0.3,
+                        ease: "power3.inOut",
+                        overwrite: "auto"
+                    });
+                };
+
+                const onCursorDown = () => {
+                    gsap.to(cursor, {
+                        scale: 0.85,
+                        duration: 0.15,
+                        ease: "power2.out",
+                        yoyo: true,
+                        repeat: 1,
+                        overwrite: "auto"
+                    });
+                };
+
+                cards.forEach((card) => {
+                    card.addEventListener('mouseenter', onCursorEnter);
+                    card.addEventListener('mouseleave', onCursorLeave);
+                    card.addEventListener('mousedown', onCursorDown);
+
+                    cleanups.push(() => {
+                        card.removeEventListener('mouseenter', onCursorEnter);
+                        card.removeEventListener('mouseleave', onCursorLeave);
+                        card.removeEventListener('mousedown', onCursorDown);
+                    });
+                });
+            }
+
+            cards.forEach((card) => {
                 const hoverBg = card.querySelector('.card-hover-bg');
+                if (!hoverBg) return;
 
                 gsap.set(hoverBg, { xPercent: -100 });
 
@@ -87,7 +169,8 @@ const Projects = () => {
                     gsap.to(hoverBg, {
                         xPercent: 0,
                         duration: 0.3,
-                        ease: "cubic-bezier(0.7, 0, 0.3, 1)"
+                        ease: "power3.inOut",
+                        overwrite: "auto"
                     });
                 };
 
@@ -95,7 +178,8 @@ const Projects = () => {
                     gsap.to(hoverBg, {
                         xPercent: -100,
                         duration: 0.3,
-                        ease: "cubic-bezier(0.7, 0, 0.3, 1)"
+                        ease: "power3.inOut",
+                        overwrite: "auto"
                     });
                 };
 
@@ -113,10 +197,21 @@ const Projects = () => {
             };
         });
 
+        return () => mm.revert();
+
     }, { scope: containerRef });
 
     return (
         <section id='projects' ref={containerRef} className="w-full px-3 sm:px-8 font-primary py-24 md:py-32">
+            <div
+                ref={cursorRef}
+                className="project-hover-cursor pointer-events-none fixed left-0 top-0 z-[9998] hidden h-24 w-24 items-center justify-center rounded-full border border-[#f4f1de]/30 bg-[var(--cursor-bg,#D2FF00)] text-[var(--cursor-fg,#0e0e0e)] opacity-0 invisible shadow-[0_18px_50px_rgba(0,0,0,0.35)] will-change-transform md:flex"
+                aria-hidden="true"
+            >
+                <span className="text-center text-[0.68rem] font-black uppercase leading-[0.82] tracking-normal">
+                    View<br />More
+                </span>
+            </div>
 
             {/* --- INTRO SECTION --- */}
             <div className="projects-intro mb-20">
@@ -142,11 +237,14 @@ const Projects = () => {
                             onClick={(e) => handleCardClick(e, project)}
                             href={`/projects/${project.id}`}
                             key={project.id}
-                            className="project-card group relative block w-full outline-none overflow-hidden p-3 sm:p-4 md:p-6 lg:p-8 bg-transparent"
+                            data-theme-color={project.themeColor}
+                            data-text-color={project.textColor}
+                            aria-label={`View more about ${project.name}`}
+                            className="project-card group relative block w-full cursor-pointer outline-none overflow-hidden p-3 sm:p-4 md:cursor-none md:p-6 lg:p-8 bg-transparent"
                         >
 
                             <div
-                                className="card-hover-bg absolute inset-0 origin-left z-0"
+                                className="card-hover-bg absolute inset-0 origin-left z-0 -translate-x-full"
                                 style={{ backgroundColor: project.themeColor }}
                             />
 
@@ -164,9 +262,17 @@ const Projects = () => {
                                     className="object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105 "
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                 />
+
+                                <div
+                                    className="absolute right-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-[#0e0e0e]/10 shadow-[0_10px_25px_rgba(0,0,0,0.2)] md:hidden"
+                                    style={{ backgroundColor: project.themeColor, color: project.textColor }}
+                                    aria-hidden="true"
+                                >
+                                    <ArrowUpRight size={22} strokeWidth={2.5} />
+                                </div>
                             </div>
 
-                            {/* Overlapping Labels (Removed refs since they won't animate) */}
+                            {/* Overlapping Labels */}
                             <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 lg:bottom-8 lg:right-8 flex flex-col items-end z-20 pointer-events-none">
                                 <div
                                     className="relative overflow-hidden w-max"

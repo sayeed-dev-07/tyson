@@ -34,7 +34,7 @@ const About = () => {
                     trigger: aboutRef.current,
                     start: "top 75%",
                     end: "bottom 75%",
-                    scrub: 0.5,
+                    scrub: 1,
                 }
             }
         );

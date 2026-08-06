@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SplitText } from 'gsap/SplitText';
 
+
 gsap.config({
     force3D: true
 });
@@ -28,49 +29,59 @@ export const BlockRevealText: React.FC<BlockRevealTextProps> = ({
     useGSAP(() => {
         if (!textRef.current) return;
 
-        // 1. Split the text into separate line elements using GSAP SplitText
-        const split = new SplitText(textRef.current, { type: 'lines' });
+        // Initialize GSAP matchMedia
+        const mm = gsap.matchMedia();
 
-        // 2. Prepare each line wrapper and inject the colored block
-        if (split.lines) {
-            split.lines.forEach((el) => {
-                // Assert the type to HTMLElement
-                const line = el as HTMLElement; 
+        // Run this logic only on screens 768px and wider (standard md breakpoint)
+        mm.add("(min-width: 768px)", () => {
+            // 1. Split the text into separate line elements using GSAP SplitText
+            const split = new SplitText(textRef.current, { type: 'lines' });
 
-                // Force the line div to only be as wide as the text inside it
-                line.style.width = 'fit-content';
-                line.style.position = 'relative';
+            // 2. Prepare each line wrapper and inject the colored block
+            if (split.lines) {
+                split.lines.forEach((el) => {
+                    // Assert the type to HTMLElement
+                    const line = el as HTMLElement;
 
-                // Create the block cover dynamically
-                const cover = document.createElement('div');
-                cover.className = 'block-cover-element absolute top-0 left-0 w-full h-full z-10';
-                cover.style.backgroundColor = blockColor;
-                cover.style.clipPath = 'inset(0% 0% 0% 0%)';
+                    // Force the line div to only be as wide as the text inside it
+                    line.style.width = 'fit-content';
+                    line.style.position = 'relative';
 
-                // Append the block directly inside the line
-                line.appendChild(cover);
+                    // Create the block cover dynamically
+                    const cover = document.createElement('div');
+                    cover.className = 'block-cover-element absolute top-0 left-0 w-full h-full z-10';
+                    cover.style.backgroundColor = blockColor;
+                    cover.style.clipPath = 'inset(0% 0% 0% 0%)';
+
+                    // Append the block directly inside the line
+                    line.appendChild(cover);
+                });
+            }
+
+            // 3. Animate the cover blocks
+            const covers = gsap.utils.toArray('.block-cover-element', containerRef.current);
+
+            gsap.to(covers, {
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                },
+                clipPath: "inset(0% 0% 0% 100%)", // Slide out to the right
+                duration: 1.2,
+                stagger: 0.15,
+                ease: "power3.inOut"
             });
-        }
 
-        // 3. Animate the cover blocks
-        const covers = gsap.utils.toArray('.block-cover-element', containerRef.current);
-
-        gsap.to(covers, {
-            scrollTrigger: {
-                trigger: containerRef.current,
-                start: "top 90%",
-                toggleActions: "play none none none"
-            },
-            clipPath: "inset(0% 0% 0% 100%)", // Slide out to the right
-            duration: 1.2,
-            stagger: 0.15,
-            ease: "power3.inOut"
+            // 4. Cleanup when text changes or window resizes below 768px
+            return () => {
+                split.revert();
+            };
         });
 
-        // 4. Cleanup on unmount or when text changes
-        return () => {
-            split.revert();
-        };
+        // Cleanup the matchMedia instance on unmount
+        return () => mm.revert();
+
     }, { scope: containerRef, dependencies: [text] });
 
     return (

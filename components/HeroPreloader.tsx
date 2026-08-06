@@ -32,7 +32,7 @@ const HeroPreloader = ({ onComplete }: HeroPreloaderProps) => {
             // Determine screen size (Tailwind 'md' breakpoint is 768px)
             // This safely runs only on the client because it's inside useEffect
             const isMdOrLarger = window.matchMedia('(min-width: 768px)').matches;
-            const requiredWaitTime = isMdOrLarger ? 3000 : 5000;
+            const requiredWaitTime = isMdOrLarger ? 2000 : 3000;
 
             // Promise 1: The mandatory minimum wait time based on screen size
             const minimumWaitTime = new Promise(resolve => setTimeout(resolve, requiredWaitTime));

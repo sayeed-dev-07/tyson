@@ -79,14 +79,14 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
                     onClick={() => router.back()}
                     className="border border-white/30 w-fit cursor-pointer"
                     fillClass="bg-white"
-                    contentClass="px-4 py-2 flex font-secondary items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white group-hover:text-black transition-colors"
+                    contentClass="px-4 py-2 flex font-secondary items-center gap-2 text-xs font-semibold uppercase tracking-widest text-white md:group-hover:text-black transition-colors"
                 >
                     <ChevronLeft className="w-4 h-4" />
                     Back to projects
                 </AnimatedHoverWrapper>
 
                 {/* Headers */}
-                <h1 className="text-4xl font-primary md:text-5xl lg:text-5xl xl:text-6xl tracking-tight text-[#F05641]">
+                <h1 className="text-4xl font-primary md:text-5xl lg:text-5xl xl:text-6xl uppercase tracking-tight text-[#F05641]">
                     <BlockRevealText text={data.name} />
                 </h1>
                 <h2 className="text-2xl font-secondary opacity-90 text-[#F4F1DE] ">
@@ -104,7 +104,7 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
                             <AnimatedHoverWrapper
                                 className="border border-[color:var(--theme-color)] cursor-default"
                                 fillClass="bg-[color:var(--theme-color)]"
-                                contentClass="px-4 py-1.5 text-sm font-classic text-[color:var(--theme-color)] cursor-cell group-hover:text-[color:var(--text-color)]"
+                                contentClass="px-4 py-1.5 text-sm font-classic text-[color:var(--theme-color)] cursor-cell md:group-hover:text-[color:var(--text-color)]"
                             >
                                 {data.projectType}
                             </AnimatedHoverWrapper>
@@ -122,7 +122,7 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
                                     key={index}
                                     className="border border-[color:var(--theme-color)] cursor-default"
                                     fillClass="bg-[color:var(--theme-color)]"
-                                    contentClass="px-3 font-classic cursor-cell py-1 text-xs sm:text-sm font-medium text-[color:var(--theme-color)] group-hover:text-[color:var(--text-color)]"
+                                    contentClass="px-3 font-classic cursor-cell py-1 text-xs sm:text-sm font-medium text-[color:var(--theme-color)] md:group-hover:text-[color:var(--text-color)]"
                                 >
                                     {techItem}
                                 </AnimatedHoverWrapper>
@@ -136,7 +136,7 @@ const ProjectDetails = ({ data }: { data: ProjectType }) => {
                     <AnimatedHoverWrapper
                         className="border border-[color:var(--theme-color)] w-full cursor-pointer"
                         fillClass="bg-[color:var(--theme-color)]"
-                        contentClass="px-6 py-4 w-full flex justify-center items-center gap-3 text-sm uppercase tracking-widest font-bold text-[color:var(--theme-color)] font-secondary group-hover:text-[color:var(--text-color)] transition-colors"
+                        contentClass="px-6 py-4 w-full flex justify-center items-center gap-3 text-sm uppercase tracking-widest font-bold text-[color:var(--theme-color)] font-secondary md:group-hover:text-[color:var(--text-color)] transition-colors"
                     >
                         Visit Site
                         <ArrowUpRight className="w-4 h-4" />

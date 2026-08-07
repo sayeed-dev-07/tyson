@@ -27,16 +27,30 @@ const AnimatedHoverWrapper: React.FC<AnimatedHoverWrapperProps> = ({
     const { contextSafe } = useGSAP(() => {
         if (!containerRef.current || !bgColorRef.current) return;
 
-        tl.current = gsap.timeline({ paused: true });
-        tl.current.to(bgColorRef.current, {
-            x: 0,
-            duration: 0.3,
-            ease: 'expo.out'
+        // Initialize GSAP matchMedia
+        const mm = gsap.matchMedia();
+
+        // Target screens md and up (>= 768px)
+        mm.add("(min-width: 768px)", () => {
+            tl.current = gsap.timeline({ paused: true });
+
+            tl.current.to(bgColorRef.current, {
+                x: 0,
+                duration: 0.3,
+                ease: 'expo.out'
+            });
+
+            // Cleanup when the window resizes below 768px
+            return () => {
+                tl.current = null;
+            };
         });
+
     }, { scope: containerRef });
 
     // Safely combine our GSAP hover logic with any hover events passed via props
     const mouseHoverIn = contextSafe((e: React.MouseEvent<HTMLDivElement>) => {
+        // tl.current will be null on mobile, so the optional chaining ignores the play() call
         tl.current?.play();
         if (onMouseEnter) onMouseEnter(e);
     });

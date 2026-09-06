@@ -49,7 +49,7 @@ export const projectData: ProjectType[] = [
             'GSAP',
             'Lenis'
         ],
-        live: 'https://kelleyrandr.com/',
+        live: 'https://kelly-roofing-umber.vercel.app/',
         img: '/projectImg/kelly.webp',
         themeColor: '#F05641',
         textColor: '#f4f1de',

@@ -2,41 +2,7 @@ import { ProjectType } from "@/types/types";
 
 export const projectData: ProjectType[] = [
 
-    {
-        id: 'Rm-Roofing',
-        name: 'Rm-Roofing',
-        type: 'Landing Page',
-        tech: [
-            'React',
-            'Next.js',
-            'Tailwind CSS',
-            'JavaScript',
-            'GSAP'
-        ],
-        live: 'https://rm-roofing-three.vercel.app/',
-        img: '/projectImg/rm-roofing.webp',
-        themeColor: '#F4F1DE',
-        textColor: '#0e0e0e',
-        projectType: 'commercial'
-    },
-    {
-        id: 'erasync',
-        name: 'Erasync',
-        type: 'Landing Page',
-        tech: [
-            'React',
-            'Next.js',
-            'Tailwind CSS',
-            'JavaScript',
-            'GSAP',
-            'Lenis'
-        ],
-        live: 'https://erasync.vercel.app/',
-        img: '/projectImg/erasync.webp',
-        themeColor: '#FBA555',
-        textColor: '#0e0e0e',
-        projectType: 'commercial'
-    },
+
     {
         id: 'kelly-roofing',
         name: 'Kelly Roofing',
@@ -185,6 +151,41 @@ export const projectData: ProjectType[] = [
         ],
         live: 'https://demo-view-xi.vercel.app/',
         img: '/projectImg/erakit.webp',
+        themeColor: '#FBA555',
+        textColor: '#0e0e0e',
+        projectType: 'commercial'
+    },
+    {
+        id: 'Rm-Roofing',
+        name: 'Rm-Roofing',
+        type: 'Landing Page',
+        tech: [
+            'React',
+            'Next.js',
+            'Tailwind CSS',
+            'JavaScript',
+            'GSAP'
+        ],
+        live: 'https://rm-roofing-three.vercel.app/',
+        img: '/projectImg/rm-roofing.webp',
+        themeColor: '#F4F1DE',
+        textColor: '#0e0e0e',
+        projectType: 'commercial'
+    },
+    {
+        id: 'erasync',
+        name: 'Erasync',
+        type: 'Landing Page',
+        tech: [
+            'React',
+            'Next.js',
+            'Tailwind CSS',
+            'JavaScript',
+            'GSAP',
+            'Lenis'
+        ],
+        live: 'https://erasync.vercel.app/',
+        img: '/projectImg/erasync.webp',
         themeColor: '#FBA555',
         textColor: '#0e0e0e',
         projectType: 'commercial'
